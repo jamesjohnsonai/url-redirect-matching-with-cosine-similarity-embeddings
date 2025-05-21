@@ -69,7 +69,7 @@ with st.expander("❓ Why not just use fuzzy matching?"):
     Traditional redirect tools rely on exact or fuzzy string matching. That’s fast, but shallow.
 
     This tool uses **OpenAI embeddings** to understand the meaning behind the content.
-    - It can match "Pest control near me" ↔ "Exterminator services"
+    - It can match "How to get rid of rats" ↔ "rat control methods"
     - Works great for different phrasings across domains
 
     🔍 Think of it as redirect mapping powered by language understanding.
