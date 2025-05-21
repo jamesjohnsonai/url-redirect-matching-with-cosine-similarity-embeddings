@@ -5,7 +5,27 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import time
 
-st.set_page_config(page_title="AI Redirect Mapper", layout="wide")
+st.set_page_config(page_title="AI Redirect Mapper", layout="centered")
+st.markdown("""
+<style>
+    .step-box {
+        background-color: #f0f2f6;
+        padding: 1.25rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 6px solid #4a90e2;
+    }
+    .step-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #4a90e2;
+    }
+    .step-text {
+        font-size: 1rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🤖 AI-Powered Semantic Redirect Mapper")
 
 with st.expander("ℹ️ About this tool"):
@@ -56,7 +76,16 @@ with st.expander("❓ Why not just use fuzzy matching?"):
     """)
 
 # --- Step 1: User enters their own OpenAI key ---
-api_key_input = st.text_input("🔑 Enter your OpenAI API key", type="password")
+st.markdown("""
+<div class='step-box'>
+    <div class='step-title'>Step 1: Enter Your OpenAI API Key</div>
+    <div class='step-text'>
+        Paste your OpenAI key below to authenticate embedding generation. Your key is never stored.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+api_key_input = st.text_input("🔑 OpenAI API key", type="password")
 if api_key_input:
     st.session_state.api_key = api_key_input
 
@@ -67,9 +96,17 @@ if "api_key" not in st.session_state or not st.session_state.api_key:
 openai.api_key = st.session_state.api_key
 
 # --- Step 2: Upload CSVs ---
-st.markdown("### 📂 Upload CSVs")
-file_a = st.file_uploader("Upload Site A CSV", type="csv", key="site_a")
-file_b = st.file_uploader("Upload Site B CSV", type="csv", key="site_b")
+st.markdown("""
+<div class='step-box'>
+    <div class='step-title'>Step 2: Upload Your Site CSV Files</div>
+    <div class='step-text'>
+        Upload one file for Site A and one for Site B. Each must contain columns: URL, H1, Embeddings, and Keywords.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+file_a = st.file_uploader("📄 Upload Site A CSV", type="csv", key="site_a")
+file_b = st.file_uploader("📄 Upload Site B CSV", type="csv", key="site_b")
 
 # --- Helper functions ---
 def batch_get_embeddings(text_list, label):
