@@ -9,10 +9,11 @@ st.set_page_config(page_title="URL Matcher", layout="wide")
 st.title("🔗 Site A vs Site B URL Matching")
 
 # --- Step 1: User enters their own OpenAI key ---
-if "api_key" not in st.session_state:
-    st.session_state.api_key = st.text_input("🔑 Enter your OpenAI API key", type="password")
+api_key_input = st.text_input("🔑 Enter your OpenAI API key", type="password")
+if api_key_input:
+    st.session_state.api_key = api_key_input
 
-if not st.session_state.api_key:
+if "api_key" not in st.session_state or not st.session_state.api_key:
     st.warning("Please enter your OpenAI API key to continue.")
     st.stop()
 
