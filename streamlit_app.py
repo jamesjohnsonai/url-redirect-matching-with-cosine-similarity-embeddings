@@ -5,57 +5,54 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import time
 
-st.set_page_config(page_title="URL Matcher", layout="wide")
-st.title("🔗 Site A vs Site B URL Matching")
+st.set_page_config(page_title="AI Redirect Mapper", layout="wide")
+st.title("🤖 AI-Powered Semantic Redirect Mapper")
 
-# --- Intro and Instructions ---
-st.markdown(""" 
-## 🤖 Intelligent URL Redirect Matcher  
-Match URLs from two different sites using **semantic similarity** — not just strings.
+with st.expander("ℹ️ About this tool"):
+    st.markdown(""" 
+    This tool matches URLs from two different sites using **semantic similarity** — not just string comparison.
 
-Unlike basic tools that match based on exact or fuzzy text, this tool uses **OpenAI embeddings** to compare **the meaning** behind each page using:
-- Page content (from embeddings)
-- H1 heading
-- Top 5 organic keywords
-- URL context
+    Powered by OpenAI embeddings, it compares pages based on:
+    - Full page content
+    - H1 tags
+    - Top 5 organic keywords
+    - URL context
 
-Ideal for:
-- Site migrations
-- Domain consolidations
-- Semantic content mapping
+    It's ideal for:
+    - Website migrations
+    - Domain consolidations
+    - Semantic SEO audits
+    - Redirect mapping that goes beyond fuzzy matching
 
-🔐 Bring your own OpenAI API key — it's never stored.
-""", unsafe_allow_html=True)
+    🔐 You provide your own OpenAI API key. Nothing is stored.
+    """)
 
-st.info("""  
-### 📋 How to Use
-
-1. Crawl **both sites** using [Screaming Frog](https://www.screamingfrog.co.uk/seo-spider/)  
-   – Include: URL, H1, **OpenAI Embeddings**, and keywords (via custom JavaScript or external merge)
-
-2. Format both CSVs like this:  
-```
-| URL | H1 | Embeddings | Keywords |
-```
-- **Embeddings**: Comma-separated 1536-d OpenAI vectors  
-- **Keywords**: One keyword per line (newline-separated)
-
-3. Upload Site A and Site B CSVs  
-4. Enter your **OpenAI API key**  
-5. Wait while the app generates semantic matches  
-6. Download your results!  
-""")
-
-with st.expander("What makes this better than fuzzy lookup?"):
+with st.expander("📋 How to use"):
     st.markdown("""
-Traditional redirect mapping tools compare URLs or H1s using simple string similarity.  
-This tool uses **semantic embeddings** to understand the **actual meaning** of each page.
+    1. Crawl **both sites** using [Screaming Frog](https://www.screamingfrog.co.uk/seo-spider/)
+        - Make sure to extract: `URL`, `H1`, OpenAI `Embeddings` (via JavaScript integration), and `Keywords`
 
-That means it can match:
-- "Rodent control solutions" ↔ "How to get rid of rats"
-- Even if the phrasing is different!
+    2. Format both CSVs like this:
+    ```
+    | URL | H1 | Embeddings | Keywords |
+    ```
+    - `Embeddings`: 1536-dim OpenAI vectors in a single comma-separated string
+    - `Keywords`: newline-separated (each on a new line within the same cell)
 
-🔍 Powered by OpenAI’s `text-embedding-3-small` model.
+    3. Upload the two CSVs — one for **Site A** and one for **Site B**
+    4. Enter your **OpenAI API key** (kept private)
+    5. Click "Download CSV" after results are generated
+    """)
+
+with st.expander("❓ Why not just use fuzzy matching?"):
+    st.markdown("""
+    Traditional redirect tools rely on exact or fuzzy string matching. That’s fast, but shallow.
+
+    This tool uses **OpenAI embeddings** to understand the meaning behind the content.
+    - It can match "Pest control near me" ↔ "Exterminator services"
+    - Works great for different phrasings across domains
+
+    🔍 Think of it as redirect mapping powered by language understanding.
     """)
 
 # --- Step 1: User enters their own OpenAI key ---
@@ -70,7 +67,7 @@ if "api_key" not in st.session_state or not st.session_state.api_key:
 openai.api_key = st.session_state.api_key
 
 # --- Step 2: Upload CSVs ---
-st.markdown("### 📂 Upload CSVs for Site A and Site B")
+st.markdown("### 📂 Upload CSVs")
 file_a = st.file_uploader("Upload Site A CSV", type="csv", key="site_a")
 file_b = st.file_uploader("Upload Site B CSV", type="csv", key="site_b")
 
