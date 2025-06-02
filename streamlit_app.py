@@ -108,7 +108,7 @@ file_b = st.file_uploader("📄 Upload Site B CSV", type="csv", key="site_b")
 
 def safe_embedding_parse(x):
     try:
-        if pd.isna(x) or not isinstance(x, str):
+        if pd.isna(x) or not isinstance(x, str) or x.strip() == "":
             return np.zeros(1536)
         return np.array([float(i) for i in x.split(',')])
     except:
@@ -127,8 +127,9 @@ def batch_get_embeddings(text_list, label):
     total = len(text_list)
     for i in range(0, total, batch_size):
         batch = text_list[i:i + batch_size]
+        clean_batch = [text if text.strip() else "empty" for text in batch]
         try:
-            response = openai.embeddings.create(input=batch, model="text-embedding-3-small")
+            response = openai.embeddings.create(input=clean_batch, model="text-embedding-3-small")
             embeddings = [item.embedding for item in response.data]
         except Exception as e:
             st.error(f"Batch failed ({label}): {e}")
