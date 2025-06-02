@@ -69,13 +69,12 @@ with st.expander("❓ Why not just use fuzzy matching?"):
     Traditional redirect tools rely on exact or fuzzy string matching. That’s fast, but shallow.
 
     This tool uses **OpenAI embeddings** to understand the meaning behind the content.
-    - It can match "How to get rid of rats" ↔ "rat control methods"
+    - It can match "Pest control near me" ↔ "Exterminator services"
     - Works great for different phrasings across domains
 
     🔍 Think of it as redirect mapping powered by language understanding.
     """)
 
-# --- Step 1: User enters their own OpenAI key ---
 st.markdown("""
 <div class='step-box'>
     <div class='step-title'>Step 1: Enter Your OpenAI API Key</div>
@@ -95,7 +94,6 @@ if "api_key" not in st.session_state or not st.session_state.api_key:
 
 openai.api_key = st.session_state.api_key
 
-# --- Step 2: Upload CSVs ---
 st.markdown("""
 <div class='step-box'>
     <div class='step-title'>Step 2: Upload Your Site CSV Files</div>
@@ -108,7 +106,14 @@ st.markdown("""
 file_a = st.file_uploader("📄 Upload Site A CSV", type="csv", key="site_a")
 file_b = st.file_uploader("📄 Upload Site B CSV", type="csv", key="site_b")
 
-# --- Helper functions ---
+def safe_embedding_parse(x):
+    try:
+        if pd.isna(x) or not isinstance(x, str):
+            return np.zeros(1536)
+        return np.array([float(i) for i in x.split(',')])
+    except:
+        return np.zeros(1536)
+
 def batch_get_embeddings(text_list, label):
     key = f"{label}_embeddings"
     if key in st.session_state:
@@ -143,25 +148,24 @@ def combine_embeddings(row, w_content=0.6, w_h1=0.2, w_kw=0.15, w_url=0.05):
         w_url * np.array(row['URL_Embedding'])
     )
 
-# --- Step 3: When files are uploaded ---
 if file_a and file_b:
     df_a = pd.read_csv(file_a)
     df_b = pd.read_csv(file_b)
 
-    df_a['Embeddings'] = df_a['Embeddings'].apply(lambda x: np.array([float(i) for i in x.split(',')]))
-    df_b['Embeddings'] = df_b['Embeddings'].apply(lambda x: np.array([float(i) for i in x.split(',')]))
+    df_a['Embeddings'] = df_a['Embeddings'].apply(safe_embedding_parse)
+    df_b['Embeddings'] = df_b['Embeddings'].apply(safe_embedding_parse)
 
-    df_a['Keywords_Clean'] = df_a['Keywords'].astype(str).apply(lambda x: ' '.join(x.splitlines()))
-    df_b['Keywords_Clean'] = df_b['Keywords'].astype(str).apply(lambda x: ' '.join(x.splitlines()))
+    df_a['Keywords_Clean'] = df_a['Keywords'].fillna('').astype(str).apply(lambda x: ' '.join(x.splitlines()))
+    df_b['Keywords_Clean'] = df_b['Keywords'].fillna('').astype(str).apply(lambda x: ' '.join(x.splitlines()))
 
     st.subheader("🔄 Generating embeddings for Site A")
-    df_a['H1_Embedding'] = batch_get_embeddings(df_a['H1'].astype(str).tolist(), "Site A H1")
-    df_a['URL_Embedding'] = batch_get_embeddings(df_a['URL'].astype(str).tolist(), "Site A URL")
+    df_a['H1_Embedding'] = batch_get_embeddings(df_a['H1'].fillna('').astype(str).tolist(), "Site A H1")
+    df_a['URL_Embedding'] = batch_get_embeddings(df_a['URL'].fillna('').astype(str).tolist(), "Site A URL")
     df_a['KW_Embedding'] = batch_get_embeddings(df_a['Keywords_Clean'].tolist(), "Site A Keywords")
 
     st.subheader("🔄 Generating embeddings for Site B")
-    df_b['H1_Embedding'] = batch_get_embeddings(df_b['H1'].astype(str).tolist(), "Site B H1")
-    df_b['URL_Embedding'] = batch_get_embeddings(df_b['URL'].astype(str).tolist(), "Site B URL")
+    df_b['H1_Embedding'] = batch_get_embeddings(df_b['H1'].fillna('').astype(str).tolist(), "Site B H1")
+    df_b['URL_Embedding'] = batch_get_embeddings(df_b['URL'].fillna('').astype(str).tolist(), "Site B URL")
     df_b['KW_Embedding'] = batch_get_embeddings(df_b['Keywords_Clean'].tolist(), "Site B Keywords")
 
     st.subheader("🔁 Calculating Matches")
