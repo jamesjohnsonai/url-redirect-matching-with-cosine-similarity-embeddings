@@ -35,13 +35,15 @@ with st.expander("ℹ️ About this tool"):
     Powered by OpenAI embeddings, it compares pages based on:
     - Full page content
     - H1 tags
-    - URL context
+    - URL context (path, slug)
 
     It's ideal for:
     - Website migrations
     - Domain consolidations
     - Semantic SEO audits
     - Redirect mapping that goes beyond fuzzy matching
+
+    🧠 It does **not rely on exact keyword or string matching**, but instead uses language models to understand meaning.
 
     🔐 You provide your own OpenAI API key. Nothing is stored.
     """)
