@@ -79,62 +79,7 @@ st.markdown("""
 file_a = st.file_uploader("📄 Upload Site A CSV", type="csv", key="site_a")
 file_b = st.file_uploader("📄 Upload Site B CSV", type="csv", key="site_b")
 
-if file_a and file_b:
-    df_a = pd.read_csv(file_a)
-    df_b = pd.read_csv(file_b)
-
-    st.markdown("### 🧭 Map Site A Columns")
-    col_url_a = st.selectbox("Site A: Select the URL column", df_a.columns)
-    col_h1_a = st.selectbox("Site A: Select the H1 column", df_a.columns)
-    col_emb_a = st.selectbox("Site A: Select the Embeddings column", df_a.columns)
-
-    st.markdown("### 🧭 Map Site B Columns")
-    col_url_b = st.selectbox("Site B: Select the URL column", df_b.columns)
-    col_h1_b = st.selectbox("Site B: Select the H1 column", df_b.columns)
-    col_emb_b = st.selectbox("Site B: Select the Embeddings column", df_b.columns)
-
-    def safe_embedding_parse(x):
-        try:
-            if pd.isna(x) or not isinstance(x, str) or x.strip() == "":
-                return np.zeros(1536)
-            return np.array([float(i) for i in x.split(',')])
-        except:
-            return np.zeros(1536)
-
-    def batch_get_embeddings(text_list, label):
-        key = f"{label}_embeddings"
-        if key in st.session_state:
-            use_cached = st.checkbox(f"Use cached embeddings for {label}?", value=True)
-            if use_cached:
-                return st.session_state[key]
-
-        batch_size = 50
-        results = []
-        progress = st.progress(0)
-        total = len(text_list)
-        for i in range(0, total, batch_size):
-            batch = text_list[i:i + batch_size]
-            clean_batch = [text if text.strip() else "empty" for text in batch]
-            try:
-                response = openai.embeddings.create(input=clean_batch, model="text-embedding-3-small")
-                embeddings = [item.embedding for item in response.data]
-            except Exception as e:
-                st.error(f"Batch failed ({label}): {e}")
-                embeddings = [[0.0]*1536 for _ in batch]
-            results.extend(embeddings)
-            progress.progress(min((i + batch_size) / total, 1.0))
-            time.sleep(1)
-
-        st.session_state[key] = results
-        return results
-
-    def combine_embeddings(row, w_content=0.7, w_h1=0.2, w_url=0.1):
-        return (
-            w_content * np.array(row['Embeddings']) +
-            w_h1 * np.array(row['H1_Embedding']) +
-            w_url * np.array(row['URL_Embedding'])
-        )
-
+if 'upload_ready' in st.session_state and st.session_state.upload_ready:
     # Apply column mappings
     df_a['URL'] = df_a[col_url_a]
     df_a['H1'] = df_a[col_h1_a]
