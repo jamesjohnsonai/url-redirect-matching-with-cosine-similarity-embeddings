@@ -93,16 +93,68 @@ if file_a and file_b:
     col_h1_b = st.selectbox("Site B: Select the H1 column", df_b.columns, key="col_h1_b")
     col_emb_b = st.selectbox("Site B: Select the Embeddings column", df_b.columns, key="col_emb_b")
 
+    def safe_embedding_parse(x):
+        try:
+            if pd.isna(x) or not isinstance(x, str) or x.strip() == "":
+                return np.zeros(1536)
+            return np.array([float(i) for i in x.split(',')])
+        except:
+            return np.zeros(1536)
+
+    def batch_get_embeddings(text_list, label):
+        key = f"{label}_embeddings"
+        if key in st.session_state:
+            use_cached = st.checkbox(f"Use cached embeddings for {label}?", value=True)
+            if use_cached:
+                return st.session_state[key]
+
+        batch_size = 50
+        results = []
+        progress = st.progress(0)
+        total = len(text_list)
+        for i in range(0, total, batch_size):
+            batch = text_list[i:i + batch_size]
+            clean_batch = [text if text.strip() else "empty" for text in batch]
+            try:
+                response = openai.embeddings.create(input=clean_batch, model="text-embedding-3-small")
+                embeddings = [item.embedding for item in response.data]
+            except Exception as e:
+                st.error(f"Batch failed ({label}): {e}")
+                embeddings = [[0.0]*1536 for _ in batch]
+            results.extend(embeddings)
+            progress.progress(min((i + batch_size) / total, 1.0))
+            time.sleep(1)
+
+        st.session_state[key] = results
+        return results
+
+    def combine_embeddings(row, w_content=0.7, w_h1=0.2, w_url=0.1):
+        return (
+            w_content * np.array(row['Embeddings']) +
+            w_h1 * np.array(row['H1_Embedding']) +
+            w_url * np.array(row['URL_Embedding'])
+        )
+
     if st.button("✅ Confirm Column Mapping"):
-        st.session_state.upload_ready = True
-        st.session_state["col_url_a"] = col_url_a
-        st.session_state["col_h1_a"] = col_h1_a
-        st.session_state["col_emb_a"] = col_emb_a
-        st.session_state["col_url_b"] = col_url_b
-        st.session_state["col_h1_b"] = col_h1_b
-        st.session_state["col_emb_b"] = col_emb_b
+        if all([col_url_a, col_h1_a, col_emb_a, col_url_b, col_h1_b, col_emb_b]):
+            st.session_state.upload_ready = True
+            st.session_state["mapped_col_url_a"] = str(col_url_a)
+            st.session_state["mapped_col_h1_a"] = str(col_h1_a)
+            st.session_state["mapped_col_emb_a"] = str(col_emb_a)
+            st.session_state["mapped_col_url_b"] = str(col_url_b)
+            st.session_state["mapped_col_h1_b"] = str(col_h1_b)
+            st.session_state["mapped_col_emb_b"] = str(col_emb_b)
+        else:
+            st.error("Please make sure all columns are selected before confirming.")
 
 if 'upload_ready' in st.session_state and st.session_state.upload_ready:
+    col_url_a = st.session_state["mapped_col_url_a"]
+    col_h1_a = st.session_state["mapped_col_h1_a"]
+    col_emb_a = st.session_state["mapped_col_emb_a"]
+    col_url_b = st.session_state["mapped_col_url_b"]
+    col_h1_b = st.session_state["mapped_col_h1_b"]
+    col_emb_b = st.session_state["mapped_col_emb_b"]
+
     # Apply column mappings
     df_a['URL'] = df_a[col_url_a]
     df_a['H1'] = df_a[col_h1_a]
