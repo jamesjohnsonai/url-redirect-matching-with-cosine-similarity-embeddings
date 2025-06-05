@@ -116,7 +116,7 @@ if file_a and file_b:
             batch = text_list[i:i + batch_size]
             clean_batch = [text if text.strip() else "empty" for text in batch]
             try:
-                response = openai.embeddings.create(input=clean_batch, model="text-embedding-3-small")
+                response = openai.embeddings.create(input=clean_batch, model="text-embedding-3-small", encoding_format="utf-8")
                 embeddings = [item.embedding for item in response.data]
             except Exception as e:
                 st.error(f"Batch failed ({label}): {e}")
