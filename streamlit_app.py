@@ -79,6 +79,31 @@ st.markdown("""
 file_a = st.file_uploader("📄 Upload Site A CSV", type="csv", key="site_a")
 file_b = st.file_uploader("📄 Upload Site B CSV", type="csv", key="site_b")
 
+if file_a and file_b:
+    df_a = pd.read_csv(file_a)
+    df_b = pd.read_csv(file_b)
+
+    st.markdown("### 🧭 Map Site A Columns")
+    col_url_a = st.selectbox("Site A: Select the URL column", df_a.columns, key="col_url_a")
+    col_h1_a = st.selectbox("Site A: Select the H1 column", df_a.columns, key="col_h1_a")
+    col_emb_a = st.selectbox("Site A: Select the Embeddings column", df_a.columns, key="col_emb_a")
+
+    st.markdown("### 🧭 Map Site B Columns")
+    col_url_b = st.selectbox("Site B: Select the URL column", df_b.columns, key="col_url_b")
+    col_h1_b = st.selectbox("Site B: Select the H1 column", df_b.columns, key="col_h1_b")
+    col_emb_b = st.selectbox("Site B: Select the Embeddings column", df_b.columns, key="col_emb_b")
+
+    if st.button("✅ Confirm Column Mapping"):
+        st.session_state.upload_ready = True
+        st.session_state.df_a = df_a
+        st.session_state.df_b = df_b
+        st.session_state.col_url_a = col_url_a
+        st.session_state.col_h1_a = col_h1_a
+        st.session_state.col_emb_a = col_emb_a
+        st.session_state.col_url_b = col_url_b
+        st.session_state.col_h1_b = col_h1_b
+        st.session_state.col_emb_b = col_emb_b
+
 if 'upload_ready' in st.session_state and st.session_state.upload_ready:
     # Apply column mappings
     df_a['URL'] = df_a[col_url_a]
