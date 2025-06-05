@@ -95,14 +95,12 @@ if file_a and file_b:
 
     if st.button("✅ Confirm Column Mapping"):
         st.session_state.upload_ready = True
-        st.session_state.df_a = df_a
-        st.session_state.df_b = df_b
-        st.session_state.col_url_a = col_url_a
-        st.session_state.col_h1_a = col_h1_a
-        st.session_state.col_emb_a = col_emb_a
-        st.session_state.col_url_b = col_url_b
-        st.session_state.col_h1_b = col_h1_b
-        st.session_state.col_emb_b = col_emb_b
+        st.session_state["col_url_a"] = col_url_a
+        st.session_state["col_h1_a"] = col_h1_a
+        st.session_state["col_emb_a"] = col_emb_a
+        st.session_state["col_url_b"] = col_url_b
+        st.session_state["col_h1_b"] = col_h1_b
+        st.session_state["col_emb_b"] = col_emb_b
 
 if 'upload_ready' in st.session_state and st.session_state.upload_ready:
     # Apply column mappings
