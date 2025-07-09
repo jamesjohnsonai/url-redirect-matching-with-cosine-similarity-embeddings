@@ -48,6 +48,33 @@ with st.expander("ℹ️ About this tool"):
     🔐 You provide your own OpenAI API key. Nothing is stored.
     """)
 
+with st.expander("📘 How to use"):
+    st.markdown("""
+    1. Crawl each site using **Screaming Frog** with **JavaScript rendering enabled**.
+    2. Go to `Configuration > Custom > JavaScript Rendering` and insert the **custom JavaScript** template for ChatGPT embeddings (we’ll provide it — just paste your OpenAI key into the placeholder).
+    3. Once the crawl is complete, export the `Internal` tab.
+    4. Upload the resulting CSV for each site below — Site A and Site B.
+    5. You'll then be able to **map the columns** (URL, H1, Embeddings) in the app before generating similarity scores.
+    """)
+    st.markdown(""" 
+    This tool matches URLs from two different sites using **semantic similarity** — not just string comparison.
+
+    Powered by OpenAI embeddings, it compares pages based on:
+    - Full page content
+    - H1 tags
+    - URL context (path, slug)
+
+    It's ideal for:
+    - Website migrations
+    - Domain consolidations
+    - Semantic SEO audits
+    - Redirect mapping that goes beyond fuzzy matching
+
+    🧠 It does **not rely on exact keyword or string matching**, but instead uses language models to understand meaning.
+
+    🔐 You provide your own OpenAI API key. Nothing is stored.
+    """)
+
 st.markdown("""
 <div class='step-box'>
     <div class='step-title'>Step 1: Enter Your OpenAI API Key</div>
@@ -66,6 +93,8 @@ if "api_key" not in st.session_state or not st.session_state.api_key:
     st.stop()
 
 openai.api_key = st.session_state.api_key
+
+
 
 st.markdown("""
 <div class='step-box'>
